@@ -1,6 +1,9 @@
+#define _POSIX_C_SOURCE 200809L
 #include <assert.h>
+#include <errno.h>
 #include <janet.h>
 #include <stdio.h>
+#include <unistd.h>
 
 static int ident_byte(uint8_t b) {
   return (b > ' ') && (b != '=') && (b != '"');
@@ -31,7 +34,7 @@ static void buf_quote(JanetBuffer *buf, int32_t from) {
   janet_sfree(quoted);
 }
 
-static Janet jlogfmt_write_to(int32_t argc, Janet *argv) {
+static Janet jlogfmt_fmt(int32_t argc, Janet *argv) {
   if (argc < 1)
     janet_panic("expected at least a buffer in slot #0");
 
@@ -68,11 +71,34 @@ static Janet jlogfmt_write_to(int32_t argc, Janet *argv) {
   return janet_wrap_buffer(buf);
 }
 
+static Janet jlogfmt_no_buffer_write(int32_t argc, Janet *argv) {
+  janet_fixarity(argc, 2);
+  FILE *f = janet_getfile(argv, 0, NULL);
+  JanetBuffer *b = janet_getbuffer(argv, 1);
+
+  int fd = fileno(f);
+  uint8_t *data = b->data;
+  size_t n = b->count;
+  int nwritten = 0;
+  do {
+    nwritten = write(fd, data, n);
+    if (nwritten > 0) {
+      n -= nwritten;
+      data += nwritten;
+    }
+  } while (nwritten > 0 || (nwritten == -1 && errno == EINTR));
+  if (nwritten < 0)
+    janet_panicf("unable to write output: %s", strerror(errno));
+
+  return janet_wrap_nil();
+}
+
 static const JanetReg cfuns[] = {
-    {"write-to", jlogfmt_write_to,
-     "(logfmt/write-to buf & args)\n\n"
+    {"no-buffer-write", jlogfmt_no_buffer_write, ""},
+    {"fmt", jlogfmt_fmt,
+     "(logfmt/fmt buf & args)\n\n"
      "Write logfmt formatting to buffer, if a value cannot be "
      "formatted the contents of buf may be partially written."},
     {NULL, NULL, NULL}};
 
-JANET_MODULE_ENTRY(JanetTable *env) { janet_cfuns(env, "logfmt", cfuns); }
+JANET_MODULE_ENTRY(JanetTable *env) { janet_cfuns(env, "_logfmt", cfuns); }

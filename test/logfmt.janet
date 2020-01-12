@@ -12,7 +12,7 @@
   [[:foo nil] `foo`]])
 
 (each [args expected] tests
-  (def actual (_logfmt/write-to @"" ;args))
+  (def actual (_logfmt/fmt @"" ;args))
   (unless (= (string actual) (string expected "\n"))
     (print "expected:")
     (pp (string expected "\n"))
