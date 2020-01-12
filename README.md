@@ -12,8 +12,4 @@ A logfmt library for janet.
 
 (logfmt/log :foo "bar" :baz 123)
 foo=bar baz=123
-
-(logfmt/write-to @"" :v 3 bang)
-@"v=3 bang\n"
-
 ```
