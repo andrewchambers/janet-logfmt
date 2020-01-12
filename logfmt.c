@@ -73,7 +73,12 @@ static Janet jlogfmt_fmt(int32_t argc, Janet *argv) {
 
 static Janet jlogfmt_no_buffer_write(int32_t argc, Janet *argv) {
   janet_fixarity(argc, 2);
-  FILE *f = janet_getfile(argv, 0, NULL);
+  int flags;
+  FILE *f = janet_getfile(argv, 0, &flags);
+
+  if (flags & JANET_FILE_CLOSED)
+    janet_panic("log file already closed");
+
   JanetBuffer *b = janet_getbuffer(argv, 1);
 
   int fd = fileno(f);
@@ -86,7 +91,7 @@ static Janet jlogfmt_no_buffer_write(int32_t argc, Janet *argv) {
       n -= nwritten;
       data += nwritten;
     }
-  } while (nwritten > 0 || (nwritten == -1 && errno == EINTR));
+  } while ((n > 0 && nwritten != -1) || (nwritten == -1 && errno == EINTR));
   if (nwritten < 0)
     janet_panicf("unable to write output: %s", strerror(errno));
 
