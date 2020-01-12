@@ -12,3 +12,8 @@ A logfmt library for janet.
 (logfmt/log :foo "bar" :baz 123)
 foo=bar baz=123
 ```
+
+# Notes
+
+- The only characters that are escaped are '"' '\r' and '\n' to keep one log entry per line.
+  some logfmt implementation do this, others only escape '"'.
