@@ -7,9 +7,8 @@ A logfmt library for janet.
 ```
 (import logfmt)
 
-# default is stdout
-(setdyn :logfmt/out stderr)
-
+# default is stderr
+(setdyn :logfmt/out stdout)
 (logfmt/log :foo "bar" :baz 123)
 foo=bar baz=123
 ```

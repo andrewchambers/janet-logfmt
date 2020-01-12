@@ -9,7 +9,7 @@
   for other purposes.
   "
   [& args]
-  (def out (dyn :logfmt/out stdout))
+  (def out (dyn :logfmt/out stderr))
   (buffer/clear log-buf)
   (_logfmt/fmt log-buf ;args)
   (_logfmt/no-buffer-write out log-buf)
