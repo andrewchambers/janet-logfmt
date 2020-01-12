@@ -9,6 +9,7 @@
   [[:foo "abc"] `foo=abc`]
   [['foo "abc"] `foo=abc`]
   [['foo "abc" 'd] `foo=abc d`]
+  [['foo "a\r\nbc"] `foo="a\r\nbc"`]
   [[:foo nil] `foo`]])
 
 (each [args expected] tests

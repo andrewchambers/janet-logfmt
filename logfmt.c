@@ -9,22 +9,37 @@ static int ident_byte(uint8_t b) {
   return (b > ' ') && (b != '=') && (b != '"');
 }
 
+static int needs_quote(uint8_t b) {
+  return b == '\"' || b == '\r' || b == '\n';
+}
+
 static void buf_quote(JanetBuffer *buf, int32_t from) {
   assert(from < buf->count);
   size_t ntoquote = buf->count - from;
   size_t needed = ntoquote + 2;
   for (size_t i = from; i < (size_t)buf->count; i++)
-    if (buf->data[i] == '\"')
+    if (needs_quote(buf->data[i]))
       needed += 1;
   uint8_t *quoted = janet_smalloc(needed);
   size_t offset = 0;
   quoted[offset++] = '\"';
   for (size_t i = from; i < from + ntoquote; i++) {
-    if (buf->data[i] == '"') {
+    switch (buf->data[i]) {
+    case '"':
       quoted[offset++] = '\\';
       quoted[offset++] = '"';
-    } else {
+      break;
+    case '\r':
+      quoted[offset++] = '\\';
+      quoted[offset++] = 'r';
+      break;
+    case '\n':
+      quoted[offset++] = '\\';
+      quoted[offset++] = 'n';
+      break;
+    default:
       quoted[offset++] = buf->data[i];
+      break;
     }
   }
   quoted[offset++] = '\"';
