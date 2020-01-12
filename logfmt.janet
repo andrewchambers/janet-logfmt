@@ -19,3 +19,4 @@
       (_logfmt/no-buffer-write out log-buf)
       nil)))
 
+(def fmt _logfmt/fmt)
