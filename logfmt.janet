@@ -1,6 +1,6 @@
 (import _logfmt)
 
-(def log-buf @"")
+(var log-buf @"")
 
 (defn log
   "write a log entry to :logfmt/out which must be a file.
@@ -13,6 +13,9 @@
   (buffer/clear log-buf)
   (_logfmt/fmt log-buf ;args)
   (_logfmt/no-buffer-write out log-buf)
+  (if (< 8192 (length log-buf))
+    (set log-buf @"")
+    (buffer/clear log-buf))
   nil)
 
 (def fmt _logfmt/fmt)
