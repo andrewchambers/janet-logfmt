@@ -8,8 +8,7 @@
   so call file/flush first if you are also using that file
   for other purposes.
   "
-  [& args]
-  (def out (dyn :logfmt/out stderr))
+  [out & args]
   (buffer/clear log-buf)
   (_logfmt/fmt log-buf ;args)
   (_logfmt/no-buffer-write out log-buf)
